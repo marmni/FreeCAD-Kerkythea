@@ -342,10 +342,7 @@ class exportKerkythea(exportKerkytheaDialog):
 		exporter = exportTokerkythea()
 		exporter.models = projectModels
 		exporter.write('C:\test.xml', FreeCAD.ActiveDocument.Label)
-<<<<<<< HEAD
 
 		self.close()
-=======
->>>>>>> parent of abb4d29... x
 
 exportKerkythea().exec_()
