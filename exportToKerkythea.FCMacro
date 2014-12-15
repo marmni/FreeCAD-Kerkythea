@@ -197,22 +197,22 @@ class Model:
 class exportTokerkythea:
     def __init__(self):
         self.models = []
-        #self.groupObjectsByColor = True
+        modelsMultiColors = False
 
     def write(self, file, name):
         file = __builtin__.open("./textNowy.xml", "w")
         #
         self.writeHeader(file, name)
         
-#        if self.groupObjectsByColor:
-        for i in self.models.values():
-            i.write(file)
-#        else:
-#            for i, j in self.models.items():
-#                file.write('<Object Identifier="./Models/{0}" Label="Default Model" Name="{0}" Type="Model">\n'.format(i))
-#                for k in j:
-#                    k.write(file)
-#                file.write('</Object>\n')
+        if self.modelsMultiColors:
+            for i, j in self.models.items():
+                file.write('<Object Identifier="./Models/{0}" Label="Default Model" Name="{0}" Type="Model">\n'.format(i))
+                for k in j:
+                    k.write(file)
+                file.write('</Object>\n')
+        else:
+            for i in self.models.values():
+                i.write(file)
 
         self.writeFooter(file, name)
 
@@ -280,13 +280,23 @@ class exportKerkytheaDialog(QtGui.QDialog):
         exportObjectsAsBoxLay = QtGui.QVBoxLayout(exportObjectsAsBox)
         exportObjectsAsBoxLay.addWidget(self.exportObjectsAs_YES)
         exportObjectsAsBoxLay.addWidget(self.exportObjectsAs_NO)
-        
+        #
+        self.exportObjectColor_YES = QtGui.QRadioButton(u'Multi colors')
+        self.exportObjectColor_NO = QtGui.QRadioButton(u'Single color')
+        self.exportObjectColor_NO.setChecked(True)
+
+        self.exportObjectColorBox = QtGui.QGroupBox(u'Colors')
+        self.exportObjectColorBox.setDisabled(True)
+        exportObjectColorBoxLay = QtGui.QVBoxLayout(self.exportObjectColorBox)
+        exportObjectColorBoxLay.addWidget(self.exportObjectColor_YES)
+        exportObjectColorBoxLay.addWidget(self.exportObjectColor_NO)
         #####
         widget = QtGui.QWidget()
         
         lay = QtGui.QGridLayout(widget)
         lay.addWidget(exportObjectsBox, 0, 0, 1, 1)
         lay.addWidget(exportObjectsAsBox, 0, 1, 1, 1)
+        lay.addWidget(self.exportObjectColorBox, 0, 2, 1, 1)
         
         lay.setRowStretch(10, 10)
         lay.setColumnStretch(10, 10)
@@ -309,6 +319,16 @@ class exportKerkythea(exportKerkytheaDialog):
         exportKerkytheaDialog.__init__(self, parent)
 
         self.connect(self.buttonAccept, QtCore.SIGNAL("clicked ()"), self.acceptw)
+        self.connect(self.exportObjectsAs_YES, QtCore.SIGNAL("clicked ()"), self.setColors)
+        self.connect(self.exportObjectsAs_NO, QtCore.SIGNAL("clicked ()"), self.setColors)
+
+    def setColors(self):
+        if self.exportObjectsAs_YES.isChecked():
+            self.exportObjectColor_NO.setChecked(True)
+            self.exportObjectColorBox.setDisabled(True)
+            
+        else:
+            self.exportObjectColorBox.setDisabled(False)
 
     def acceptw(self):
         if self.exportObjects_All.isChecked():
@@ -340,14 +360,27 @@ class exportKerkythea(exportKerkytheaDialog):
                 else:
                     modelID = i.Label
                 #
-                if not modelID in projectModels:
-                    model = Model()
-                    if not self.exportObjectsAs_YES.isChecked():
-                        model.name = modelID
-                    model.material.diffuse = Texture(modelType)
-                    projectModels[modelID] = model
+                if self.exportObjectColor_NO.isChecked():
+                    modelsMultiColors = False
+
+                    if not modelID in projectModels:
+                        model = Model()
+                        if self.exportObjectsAs_NO.isChecked():
+                            model.name = modelID
+                        model.material.diffuse = Texture(modelType)
+                        projectModels[modelID] = model
+                    else:
+                        model = projectModels[modelID]
                 else:
-                    model = projectModels[modelID]
+                    modelsMultiColors = True
+
+                    if not modelID in projectModels:
+                        projectModels[modelID] = []
+
+                    model = Model()
+                    model.name = 'Face {0}'.format(j)
+                    model.material.diffuse = Texture(modelType)
+                    projectModels[modelID].append(model)
                    
 #                    model = Model()
 #                    model.material.diffuse = Texture(modelType)
@@ -356,7 +389,7 @@ class exportKerkythea(exportKerkytheaDialog):
                 model.addFace(i.Shape.Faces[j])
             
         exporter = exportTokerkythea()
-           #exporter.groupObjectsByColor = groupObjectsByColor
+        exporter.modelsMultiColors = modelsMultiColors
         exporter.models = projectModels
         exporter.write('C:\test.xml', FreeCAD.ActiveDocument.Label)
 
