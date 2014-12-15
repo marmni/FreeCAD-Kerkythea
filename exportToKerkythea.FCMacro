@@ -1,40 +1,41 @@
 # -*- coding: utf8 -*-
 #****************************************************************************
-#*																		  *
-#*   Kerkythea exporter													 *
-#*   Copyright (c) 2014													 *
-#*   marmni <marmni@onet.eu>												*
-#*																		  *
-#*																		  *
+#*                                                                          *
+#*   Kerkythea exporter                                                     *
+#*   Copyright (c) 2014                                                     *
+#*   marmni <marmni@onet.eu>                                                *
+#*                                                                          *
+#*                                                                          *
 #*   This program is free software; you can redistribute it and/or modify   *
-#*   it under the terms of the GNU Lesser General Public License (LGPL)	 *
-#*   as published by the Free Software Foundation; either version 2 of	  *
-#*   the License, or (at your option) any later version.					*
-#*   for detail see the LICENCE text file.								  *
-#*																		  *
-#*   This program is distributed in the hope that it will be useful,		*
-#*   but WITHOUT ANY WARRANTY; without even the implied warranty of		 *
-#*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the		  *
-#*   GNU Library General Public License for more details.				   *
-#*																		  *
-#*   You should have received a copy of the GNU Library General Public	  *
-#*   License along with this program; if not, write to the Free Software	*
+#*   it under the terms of the GNU Lesser General Public License (LGPL)     *
+#*   as published by the Free Software Foundation; either version 2 of      *
+#*   the License, or (at your option) any later version.                    *
+#*   for detail see the LICENCE text file.                                  *
+#*                                                                          *
+#*   This program is distributed in the hope that it will be useful,        *
+#*   but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+#*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+#*   GNU Library General Public License for more details.                   *
+#*                                                                          *
+#*   You should have received a copy of the GNU Library General Public      *
+#*   License along with this program; if not, write to the Free Software    *
 #*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307   *
-#*   USA																	*
-#*																		  *
+#*   USA                                                                    *
+#*                                                                          *
 #****************************************************************************
 
 #****************************************************************************
-#*																		  *
-#* 								BASED ON									*
-#*																		  *
-#* IOANNIS PANTAZOPOULOS													*
-#*																		  *
-#* Sample code exporting basic Kerkythea XML file.							*
-#*																		  *
-#* Version v1.0																*
-#*																		  *
+#*                                                                          *
+#*                                 BASED ON                                 *
+#*                                                                          *
+#* IOANNIS PANTAZOPOULOS                                                    *
+#*                                                                          *
+#* Sample code exporting basic Kerkythea XML file.                          *
+#*                                                                          *
+#* Version v1.0                                                             *
+#*                                                                          *
 #****************************************************************************
+
 
 __title__="Kerkythea exporter"
 __author__ = "marmni <marmni@onet.eu>"
@@ -54,52 +55,52 @@ import sys
 #
 ##############################################
 class point3D:
-	def __init__(self, point):
-		self.x = "%.3f" % point[0]
-		self.y = "%.3f" % point[1]
-		self.z = "%.3f" % point[2]
+    def __init__(self, point):
+        self.x = "%.3f" % point[0]
+        self.y = "%.3f" % point[1]
+        self.z = "%.3f" % point[2]
 
-	def __str__(self):
-		return '<P xyz="{0} {1} {2}"/>'.format(self.x, self.y, self.z)
+    def __str__(self):
+        return '<P xyz="{0} {1} {2}"/>'.format(self.x, self.y, self.z)
 
-	#def __eq__(self, other):
-		#if self.x == other.x and self.y == other.y and self.z == other.z:
-			#return True
-		#else:
-			#return False 
+    #def __eq__(self, other):
+        #if self.x == other.x and self.y == other.y and self.z == other.z:
+            #return True
+        #else:
+            #return False 
 
 
 ##############################################
 #
 ##############################################
 class indexListPoint3D:
-	def __init__(self, point):
-		self.i = point[0]
-		self.j = point[1]
-		self.k = point[2]
+    def __init__(self, point):
+        self.i = point[0]
+        self.j = point[1]
+        self.k = point[2]
 
-	def __str__(self):
-		return '<F ijk="{0} {1} {2}"/>'.format(self.i, self.j, self.k)
+    def __str__(self):
+        return '<F ijk="{0} {1} {2}"/>'.format(self.i, self.j, self.k)
 
 
 ##############################################
 #
 ##############################################
 class Material:
-	def __init__(self):
-		self.diffuse = None  # Texture()
-		self.shininess = 1000.0
-		self.ior = 2.0
+    def __init__(self):
+        self.diffuse = None  # Texture()
+        self.shininess = 1000.0
+        self.ior = 2.0
 
-	def write(self, file):
-		file.write('''<Object Identifier="Whitted Material" Label="Whitted Material" Name="" Type="Material">\n''')
+    def write(self, file):
+        file.write('''<Object Identifier="Whitted Material" Label="Whitted Material" Name="" Type="Material">\n''')
 
-		self.diffuse.write(file, "Diffuse")
-		self.diffuse.write(file, "Translucent")
-		self.diffuse.write(file, "Specular")
-		self.diffuse.write(file, "Transmitted")
+        self.diffuse.write(file, "Diffuse")
+        self.diffuse.write(file, "Translucent")
+        self.diffuse.write(file, "Specular")
+        self.diffuse.write(file, "Transmitted")
 
-		file.write('''<Parameter Name="Shininess" Type="Real" Value="{shininess}"/>
+        file.write('''<Parameter Name="Shininess" Type="Real" Value="{shininess}"/>
 <Parameter Name="Transmitted Shininess" Type="Real" Value="{shininess}"/>
 <Parameter Name="Index of Refraction" Type="Real" Value="{ior}"/>
 </Object>\n'''.format(shininess=self.shininess, ior=self.ior))
@@ -109,14 +110,14 @@ class Material:
 #
 ##############################################
 class Texture:
-	def __init__(self, color):
-		self.color = color
-		
-	def getColorSTR(self):
-		return '{0} {1} {2}'.format(self.color[0], self.color[1], self.color[2])
+    def __init__(self, color):
+        self.color = color
+        
+    def getColorSTR(self):
+        return '{0} {1} {2}'.format(self.color[0], self.color[1], self.color[2])
 
-	def write(self, file, identifier):
-		file.write('''<Object Identifier="./{identifier}/Constant Texture" Label="Constant Texture" Name="" Type="Texture">
+    def write(self, file, identifier):
+        file.write('''<Object Identifier="./{identifier}/Constant Texture" Label="Constant Texture" Name="" Type="Texture">
 <Parameter Name="Color" Type="RGB" Value="{color}"/>
 </Object>\n'''.format(identifier=identifier, color=self.getColorSTR()))
 
@@ -125,91 +126,91 @@ class Texture:
 #
 ##############################################
 class Model:
-	def __init__(self):
-		self.vertexList = []
-		self.normalList = []
-		self.indexList = []
-		
-		self.name = self.wygenerujID(5, 5)
-		self.material = Material()
-		
-	def addFace(self, face):
-		mesh = self.meshFace(face)
-		for pp in mesh.Facets:
-			num = len(self.vertexList)
-			for kk in pp.Points:
-				self.vertexList.append(point3D(kk))
-			self.indexList.append(indexListPoint3D([num, num + 1, num + 2]))
-		
-	def meshFace(self, shape):
-		faces = []
-		triangles = shape.tessellate(1) # the number represents the precision of the tessellation
-		for tri in triangles[1]:
-			face = []
-			for i in range(3):
-				vindex = tri[i]
-				face.append(triangles[0][vindex])
-			faces.append(face)
-		m = Mesh.Mesh(faces)
-		#Mesh.show(m)
-		return m
-		
-	def wygenerujID(self, ll, lc):
-		''' generate random model name '''
-		numerID = ""
+    def __init__(self):
+        self.vertexList = []
+        self.normalList = []
+        self.indexList = []
+        
+        self.name = self.wygenerujID(5, 5)
+        self.material = Material()
+        
+    def addFace(self, face):
+        mesh = self.meshFace(face)
+        for pp in mesh.Facets:
+            num = len(self.vertexList)
+            for kk in pp.Points:
+                self.vertexList.append(point3D(kk))
+            self.indexList.append(indexListPoint3D([num, num + 1, num + 2]))
+        
+    def meshFace(self, shape):
+        faces = []
+        triangles = shape.tessellate(1) # the number represents the precision of the tessellation
+        for tri in triangles[1]:
+            face = []
+            for i in range(3):
+                vindex = tri[i]
+                face.append(triangles[0][vindex])
+            faces.append(face)
+        m = Mesh.Mesh(faces)
+        #Mesh.show(m)
+        return m
+        
+    def wygenerujID(self, ll, lc):
+        ''' generate random model name '''
+        numerID = ""
 
-		for i in range(ll):
-			numerID += random.choice('abcdefghij')
-		numerID += "_"
-		for i in range(lc):
-			numerID += str(random.randrange(0, 99, 1))
-		
-		return numerID
+        for i in range(ll):
+            numerID += random.choice('abcdefghij')
+        numerID += "_"
+        for i in range(lc):
+            numerID += str(random.randrange(0, 99, 1))
+        
+        return numerID
 
-	def write(self, file):
-		file.write('''
+    def write(self, file):
+        file.write('''
 <Object Identifier="./Models/{name}" Label="Default Model" Name="{name}" Type="Model"> 
 <Object Identifier="Triangular Mesh" Label="Triangular Mesh" Name="" Type="Surface">
 <Parameter Name="Vertex List" Type="Point3D List" Value="{pointListSize}">\n'''.format(name=self.name, pointListSize=len(self.vertexList)))
 
-		for i in self.vertexList:
-			file.write('{0}\n'.format(i))
+        for i in self.vertexList:
+            file.write('{0}\n'.format(i))
 
-		file.write('''</Parameter>
+        file.write('''</Parameter>
 <Parameter Name="Normal List" Type="Point3D List" Value="{pointListSize}">\n'''.format(pointListSize=len(self.vertexList)))
-		file.write('<P xyz="0 0 -1"/>\n' * len(self.vertexList))
-		file.write('''</Parameter>
+        file.write('<P xyz="0 0 -1"/>\n' * len(self.vertexList))
+        file.write('''</Parameter>
 <Parameter Name="Index List" Type="Triangle Index List" Value="{indexListSize}">\n'''.format(indexListSize=len(self.indexList)))
 
-		for i in self.indexList:
-			file.write('{0}\n'.format(i))
+        for i in self.indexList:
+            file.write('{0}\n'.format(i))
 
-		file.write('''</Parameter>\n</Object>\n''')
+        file.write('''</Parameter>\n</Object>\n''')
 
-		self.material.write(file)
-		
-		file.write('</Object>')
+        self.material.write(file)
+        
+        file.write('</Object>')
 
 
 ##############################################
 #
 ##############################################
 class exportTokerkythea:
-	def __init__(self):
-		self.models = []
+    def __init__(self):
+        self.models = []
 
-	def write(self, file, name):
-		file = __builtin__.open("./textNowy.xml", "w")
-		#
-		self.writeHeader(file, name)
-		
-		for i in self.models.values():
-			i.write(file)
-		
-		self.writeFooter(file, name)
+    def write(self, file, name):
+        file = __builtin__.open("./textNowy.xml", "w")
+        #
+        self.writeHeader(file, name)
+        
+        for i in self.models.values():
+            i.write(file)
+        
+        self.writeFooter(file, name)
 
-	def writeHeader(self, file, name):
-		file.write('''<Root Label="Kernel" Name="" Type="Kernel">
+    def writeHeader(self, file, name):
+        file.write('''<Root Label="Kernel" Name="" Type="Kernel">
 <Object Identifier="./Ray Tracers/Metropolis Light Transport" Label="Metropolis Light Transport" Name="Metropolis Light Transport" Type="Ray Tracer">
 </Object>
 <Object Identifier="./Environments/Octree Environment" Label="Octree Environment" Name="Octree Environment" Type="Environment">
@@ -219,8 +220,8 @@ class exportTokerkythea:
 <Object Identifier="./Scenes/{0}" Label="Default Scene" Name="{0}" Type="Scene">\n
 '''.format(name))
 
-	def writeFooter(self, file, name):
-		file.write('''</Object>
+    def writeFooter(self, file, name):
+        file.write('''</Object>
 <Parameter Name="./Ray Tracers/Active" Type="String" Value="Metropolis Light Transport"/>
 <Parameter Name="./Environments/Active" Type="String" Value="Octree Environment"/>
 <Parameter Name="./Filters/Active" Type="String" Value="Simple Tone Mapping"/>
@@ -233,114 +234,114 @@ class exportTokerkythea:
 ##############################################
 
 class exportKerkytheaDialog(QtGui.QDialog):
-	def __init__(self, parent=None):
-		QtGui.QDialog.__init__(self, parent)
+    def __init__(self, parent=None):
+        QtGui.QDialog.__init__(self, parent)
 
-		self.setWindowTitle(u'Export to Kerkythea')
-		self.setFixedSize(700, 500)
+        self.setWindowTitle(u'Export to Kerkythea')
+        self.setFixedSize(700, 500)
 
-		#
-		self.buttonAccept = QtGui.QPushButton('Accept')
-		#
-		tab = QtGui.QTabWidget()
-		tab.addTab(self.addGeneralPage(), u'General')
-		tab.addTab(self.addLightsPage(), u'Lights')
-		tab.addTab(self.addCmerasPage(), u'Cameras')
-		#
-		lay = QtGui.QVBoxLayout(self)
-		lay.addWidget(tab)
-		lay.addWidget(self.buttonAccept)
-		
-	def addGeneralPage(self):
-		self.exportObjects_All = QtGui.QRadioButton(u'All visible objects')
-		self.exportObjects_All.setChecked(True)
-		self.exportObjects_Selected = QtGui.QRadioButton(u'All selected objects')
-		self.exportObjects_SelectedFaces = QtGui.QRadioButton(u'All selected faces')
-		self.exportObjects_SelectedFaces.setDisabled(True)
-		
-		exportObjectsBox = QtGui.QGroupBox(u'Export objects')
-		exportObjectsBoxLay = QtGui.QVBoxLayout(exportObjectsBox)
-		exportObjectsBoxLay.addWidget(self.exportObjects_All)
-		exportObjectsBoxLay.addWidget(self.exportObjects_Selected)
-		exportObjectsBoxLay.addWidget(self.exportObjects_SelectedFaces)
-		#
-		self.exportObjectsAs_YES = QtGui.QRadioButton(u'Yes')
-		self.exportObjectsAs_YES.setChecked(True)
-		self.exportObjectsAs_NO = QtGui.QRadioButton(u'No')
-		self.exportObjectsAs_NO.setDisabled(True)
-		
-		exportObjectsAsBox = QtGui.QGroupBox(u'Group models by color')
-		exportObjectsAsBoxLay = QtGui.QVBoxLayout(exportObjectsAsBox)
-		exportObjectsAsBoxLay.addWidget(self.exportObjectsAs_YES)
-		exportObjectsAsBoxLay.addWidget(self.exportObjectsAs_NO)
-		
-		#####
-		widget = QtGui.QWidget()
-		
-		lay = QtGui.QGridLayout(widget)
-		lay.addWidget(exportObjectsBox, 0, 0, 1, 1)
-		lay.addWidget(exportObjectsAsBox, 0, 1, 1, 1)
-		
-		lay.setRowStretch(10, 10)
-		lay.setColumnStretch(10, 10)
-		return widget
-		
-	def addLightsPage(self):
-		widget = QtGui.QWidget()
-		
-		return widget
-		
-	def addCmerasPage(self):
-		widget = QtGui.QWidget()
-		
-		return widget
-		
+        #
+        self.buttonAccept = QtGui.QPushButton('Accept')
+        #
+        tab = QtGui.QTabWidget()
+        tab.addTab(self.addGeneralPage(), u'General')
+        tab.addTab(self.addLightsPage(), u'Lights')
+        tab.addTab(self.addCmerasPage(), u'Cameras')
+        #
+        lay = QtGui.QVBoxLayout(self)
+        lay.addWidget(tab)
+        lay.addWidget(self.buttonAccept)
+        
+    def addGeneralPage(self):
+        self.exportObjects_All = QtGui.QRadioButton(u'All visible objects')
+        self.exportObjects_All.setChecked(True)
+        self.exportObjects_Selected = QtGui.QRadioButton(u'All selected objects')
+        self.exportObjects_SelectedFaces = QtGui.QRadioButton(u'All selected faces')
+        self.exportObjects_SelectedFaces.setDisabled(True)
+        
+        exportObjectsBox = QtGui.QGroupBox(u'Export objects')
+        exportObjectsBoxLay = QtGui.QVBoxLayout(exportObjectsBox)
+        exportObjectsBoxLay.addWidget(self.exportObjects_All)
+        exportObjectsBoxLay.addWidget(self.exportObjects_Selected)
+        exportObjectsBoxLay.addWidget(self.exportObjects_SelectedFaces)
+        #
+        self.exportObjectsAs_YES = QtGui.QRadioButton(u'Yes')
+        self.exportObjectsAs_YES.setChecked(True)
+        self.exportObjectsAs_NO = QtGui.QRadioButton(u'No')
+        self.exportObjectsAs_NO.setDisabled(True)
+        
+        exportObjectsAsBox = QtGui.QGroupBox(u'Group models by color')
+        exportObjectsAsBoxLay = QtGui.QVBoxLayout(exportObjectsAsBox)
+        exportObjectsAsBoxLay.addWidget(self.exportObjectsAs_YES)
+        exportObjectsAsBoxLay.addWidget(self.exportObjectsAs_NO)
+        
+        #####
+        widget = QtGui.QWidget()
+        
+        lay = QtGui.QGridLayout(widget)
+        lay.addWidget(exportObjectsBox, 0, 0, 1, 1)
+        lay.addWidget(exportObjectsAsBox, 0, 1, 1, 1)
+        
+        lay.setRowStretch(10, 10)
+        lay.setColumnStretch(10, 10)
+        return widget
+        
+    def addLightsPage(self):
+        widget = QtGui.QWidget()
+        
+        return widget
+        
+    def addCmerasPage(self):
+        widget = QtGui.QWidget()
+        
+        return widget
+        
 
 
 class exportKerkythea(exportKerkytheaDialog):
-	def __init__(self, parent=None):
-		exportKerkytheaDialog.__init__(self, parent)
+    def __init__(self, parent=None):
+        exportKerkytheaDialog.__init__(self, parent)
 
-		self.connect(self.buttonAccept, QtCore.SIGNAL("clicked ()"), self.acceptw)
+        self.connect(self.buttonAccept, QtCore.SIGNAL("clicked ()"), self.acceptw)
 
-	def acceptw(self):
-		if self.exportObjects_All.isChecked():
-			projectObjects = [i for i in FreeCAD.ActiveDocument.Objects if i.ViewObject.Visibility]
-		elif self.exportObjects_Selected.isChecked():
-			projectObjects = []
-			for i in FreeCADGui.Selection.getSelection():
-				if i.ViewObject.Visibility and i not in projectObjects:
-					projectObjects.append(i)
-		#
+    def acceptw(self):
+        if self.exportObjects_All.isChecked():
+            projectObjects = [i for i in FreeCAD.ActiveDocument.Objects if i.ViewObject.Visibility]
+        elif self.exportObjects_Selected.isChecked():
+            projectObjects = []
+            for i in FreeCADGui.Selection.getSelection():
+                if i.ViewObject.Visibility and i not in projectObjects:
+                    projectObjects.append(i)
+        #
 
-		projectModels = {}
-		for i in projectObjects:  # objects in document
-			try:
-				objectColors = i.ViewObject.DiffuseColor
-				shape = i.Shape.Faces
-			except:
-				continue
-				
-			for j in range(len(i.Shape.Faces)):  # object faces
-				# get face color
-				if len(objectColors) == len(i.Shape.Faces):
-					modelType = objectColors[j]
-				else:
-					modelType = objectColors[0]
-				
-				if self.exportObjectsAs_YES:
-					# set model
-					if not str(modelType) in projectModels:
-						model = Model()
-						model.material.diffuse = Texture(modelType)
-						projectModels[str(modelType)] = model
-					else:
-						model = projectModels[str(modelType)]
-				#
-				model.addFace(i.Shape.Faces[j])
-			
-		exporter = exportTokerkythea()
-		exporter.models = projectModels
-		exporter.write('C:\test.xml', FreeCAD.ActiveDocument.Label)
+        projectModels = {}
+        for i in projectObjects:  # objects in document
+            try:
+                objectColors = i.ViewObject.DiffuseColor
+                shape = i.Shape.Faces
+            except:
+                continue
+                
+            for j in range(len(i.Shape.Faces)):  # object faces
+                # get face color
+                if len(objectColors) == len(i.Shape.Faces):
+                    modelType = objectColors[j]
+                else:
+                    modelType = objectColors[0]
+                
+                if self.exportObjectsAs_YES:
+                    # set model
+                    if not str(modelType) in projectModels:
+                        model = Model()
+                        model.material.diffuse = Texture(modelType)
+                        projectModels[str(modelType)] = model
+                    else:
+                        model = projectModels[str(modelType)]
+                #
+                model.addFace(i.Shape.Faces[j])
+            
+        exporter = exportTokerkythea()
+        exporter.models = projectModels
+        exporter.write('C:\test.xml', FreeCAD.ActiveDocument.Label)
 
 exportKerkythea().exec_()
