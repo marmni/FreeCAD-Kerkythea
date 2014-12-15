@@ -188,7 +188,7 @@ class Model:
 
         self.material.write(file)
         
-        file.write('</Object>')
+        file.write('</Object>\n')
 
 
 ##############################################
@@ -197,15 +197,23 @@ class Model:
 class exportTokerkythea:
     def __init__(self):
         self.models = []
+        #self.groupObjectsByColor = True
 
     def write(self, file, name):
         file = __builtin__.open("./textNowy.xml", "w")
         #
         self.writeHeader(file, name)
         
+#        if self.groupObjectsByColor:
         for i in self.models.values():
             i.write(file)
-        
+#        else:
+#            for i, j in self.models.items():
+#                file.write('<Object Identifier="./Models/{0}" Label="Default Model" Name="{0}" Type="Model">\n'.format(i))
+#                for k in j:
+#                    k.write(file)
+#                file.write('</Object>\n')
+
         self.writeFooter(file, name)
 
     def writeHeader(self, file, name):
@@ -267,7 +275,6 @@ class exportKerkytheaDialog(QtGui.QDialog):
         self.exportObjectsAs_YES = QtGui.QRadioButton(u'Yes')
         self.exportObjectsAs_YES.setChecked(True)
         self.exportObjectsAs_NO = QtGui.QRadioButton(u'No')
-        self.exportObjectsAs_NO.setDisabled(True)
         
         exportObjectsAsBox = QtGui.QGroupBox(u'Group models by color')
         exportObjectsAsBoxLay = QtGui.QVBoxLayout(exportObjectsAsBox)
@@ -327,19 +334,29 @@ class exportKerkythea(exportKerkytheaDialog):
                     modelType = objectColors[j]
                 else:
                     modelType = objectColors[0]
-                
-                if self.exportObjectsAs_YES:
-                    # set model
-                    if not str(modelType) in projectModels:
-                        model = Model()
-                        model.material.diffuse = Texture(modelType)
-                        projectModels[str(modelType)] = model
-                    else:
-                        model = projectModels[str(modelType)]
+                #
+                if self.exportObjectsAs_YES.isChecked():
+                    modelID = str(modelType)
+                else:
+                    modelID = i.Label
+                #
+                if not modelID in projectModels:
+                    model = Model()
+                    if not self.exportObjectsAs_YES.isChecked():
+                        model.name = modelID
+                    model.material.diffuse = Texture(modelType)
+                    projectModels[modelID] = model
+                else:
+                    model = projectModels[modelID]
+                   
+#                    model = Model()
+#                    model.material.diffuse = Texture(modelType)
+#                    projectModels[i.Label].append(model)
                 #
                 model.addFace(i.Shape.Faces[j])
             
         exporter = exportTokerkythea()
+           #exporter.groupObjectsByColor = groupObjectsByColor
         exporter.models = projectModels
         exporter.write('C:\test.xml', FreeCAD.ActiveDocument.Label)
 
