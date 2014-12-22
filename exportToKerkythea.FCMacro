@@ -26,13 +26,13 @@
 
 #****************************************************************************
 #*                                                                          *
-#*                                 BASED ON                                    *
+#*                                 BASED ON                                 *
 #*                                                                          *
 #* IOANNIS PANTAZOPOULOS                                                    *
 #*                                                                          *
-#* Sample code exporting basic Kerkythea XML file.                            *
+#* Sample code exporting basic Kerkythea XML file.                          *
 #*                                                                          *
-#* Version v1.0                                                                *
+#* Version v1.0                                                             *
 #*                                                                          *
 #****************************************************************************
 
@@ -48,6 +48,7 @@ import __builtin__
 import Mesh
 from PySide import QtCore, QtGui
 import sys
+import os
 
 
 ##############################################
@@ -194,13 +195,43 @@ class Model:
 ##############################################
 #
 ##############################################
+class Camera:
+    def __init__(self):
+        self.name = "Camera_1"
+        self.f_number = "Pinhole"
+        self.resolution = "1024x768"
+        self.focusDistance = "1"
+        self.lensSamples = "3"
+        self.blades = "3"
+        self.diaphragm = "Circular"
+        self.projection = "Planar"
+
+    def addParameter(self, name, pType, value):
+        return '<Parameter Name="{0}" Type="{1}" Value="{2}"/>\n'.format(name, pType, value)
+        
+    def write(self, file):
+        file.write('<Object Identifier="./Cameras/{0}" Label="Pinhole Camera" Name="{0}" Type="Camera">\n'.format(self.name))
+        file.write(self.addParameter("Resolution", "String", self.resolution))
+        file.write(self.addParameter("Frame", "Transform", "-0.609475 0.552126 -0.568943 19.1566 0.792805 0.424451 -0.437379 14.7268 -3.72888e-008 -0.717633 -0.696421 21.4102"))
+        file.write(self.addParameter("Focus Distance", "Real", self.focusDistance))
+        file.write(self.addParameter("f-number", "String", self.f_number))
+        file.write(self.addParameter("Lens Samples", "Integer",self.lensSamples ))
+        file.write(self.addParameter("Blades", "Integer", self.blades))
+        file.write(self.addParameter("Diaphragm", "String", self.diaphragm))
+        file.write(self.addParameter("Projection", "String", self.projection))
+        file.write('</Object>\n')
+
+
+##############################################
+#
+##############################################
 class exportTokerkythea:
     def __init__(self):
         self.models = []
         modelsMultiColors = False
 
     def write(self, file, name):
-        file = __builtin__.open("./textNowy.xml", "w")
+        file = __builtin__.open(file, "w")
         #
         self.writeHeader(file, name)
         
@@ -213,6 +244,10 @@ class exportTokerkythea:
         else:
             for i in self.models.values():
                 i.write(file)
+        # CAMERA
+        self.camera.write(file)
+        #
+        file.write('<Parameter Name="./Cameras/Active" Type="String" Value="{0}"/>\n'.format(self.camera.name))
 
         self.writeFooter(file, name)
 
@@ -229,10 +264,17 @@ class exportTokerkythea:
 
     def writeFooter(self, file, name):
         file.write('''</Object>
+<Parameter Name="Mip Mapping" Type="Boolean" Value="1"/>
+<Parameter Name="./Interfaces/Active" Type="String" Value="Null Interface"/>
+<Parameter Name="./Modellers/Active" Type="String" Value="XML Modeller"/>
+<Parameter Name="./Image Handlers/Active" Type="String" Value="Free Image Support"/>
 <Parameter Name="./Ray Tracers/Active" Type="String" Value="Metropolis Light Transport"/>
+<Parameter Name="./Irradiance Estimators/Active" Type="String" Value="Null Irradiance Estimator"/>
+<Parameter Name="./Direct Light Estimators/Active" Type="String" Value="Null Direct Light Estimator"/>
 <Parameter Name="./Environments/Active" Type="String" Value="Octree Environment"/>
 <Parameter Name="./Filters/Active" Type="String" Value="Simple Tone Mapping"/>
 <Parameter Name="./Scenes/Active" Type="String" Value="{0}"/>
+<Parameter Name="./Libraries/Active" Type="String" Value="Material Librarian"/>
 </Root>'''.format(name))
 
 
@@ -245,21 +287,42 @@ class exportKerkytheaDialog(QtGui.QDialog):
         QtGui.QDialog.__init__(self, parent)
 
         self.setWindowTitle(u'Export to Kerkythea')
-        self.setFixedSize(700, 500)
+        self.setFixedSize(500, 550)
 
         #
         self.buttonAccept = QtGui.QPushButton('Accept')
         #
         tab = QtGui.QTabWidget()
         tab.addTab(self.addGeneralPage(), u'General')
-        tab.addTab(self.addLightsPage(), u'Lights')
-        tab.addTab(self.addCmerasPage(), u'Cameras')
+        tab.addTab(self.addLightsPage(), u'Light')
+        tab.addTab(self.addCmerasPage(), u'Camera')
         #
         lay = QtGui.QVBoxLayout(self)
         lay.addWidget(tab)
         lay.addWidget(self.buttonAccept)
-        
+
+    def changePathF(self):
+        path = QtGui.QFileDialog().getSaveFileName(self, u"Save as", os.path.expanduser("~"), "*.xml")
+
+        if not path == "":
+            self.filePath.setText(path[0])
+            
     def addGeneralPage(self):
+        self.filePath = QtGui.QLineEdit(os.path.join(os.path.expanduser("~"), 'Unnamed.xml'))
+        self.filePath.setReadOnly(True)
+
+        changePath = QtGui.QPushButton('...')
+        changePath.setFixedWidth(30)
+        self.connect(changePath, QtCore.SIGNAL("clicked ()"), self.changePathF)
+
+        generalBox = QtGui.QGroupBox(u'General')
+        generalBoxLay = QtGui.QGridLayout(generalBox)
+        generalBoxLay.addWidget(QtGui.QLabel(u'Path           '), 0, 0, 1, 1)
+        generalBoxLay.addWidget(self.filePath, 0, 1, 1, 2)
+        generalBoxLay.addWidget(changePath, 0, 3, 1, 1)
+
+        generalBoxLay.setColumnStretch(1, 10)
+        #
         self.exportObjects_All = QtGui.QRadioButton(u'All visible objects')
         self.exportObjects_All.setChecked(True)
         self.exportObjects_Selected = QtGui.QRadioButton(u'All selected objects')
@@ -294,12 +357,13 @@ class exportKerkytheaDialog(QtGui.QDialog):
         widget = QtGui.QWidget()
         
         lay = QtGui.QGridLayout(widget)
-        lay.addWidget(exportObjectsBox, 0, 0, 1, 1)
-        lay.addWidget(exportObjectsAsBox, 0, 1, 1, 1)
-        lay.addWidget(self.exportObjectColorBox, 0, 2, 1, 1)
+        lay.addWidget(generalBox, 0, 0, 1, 4)
+        lay.addWidget(exportObjectsBox, 1, 0, 1, 4)
+        lay.addWidget(exportObjectsAsBox, 2, 0, 1, 2)
+        lay.addWidget(self.exportObjectColorBox, 2, 2, 1, 2)
         
         lay.setRowStretch(10, 10)
-        lay.setColumnStretch(10, 10)
+        #lay.setColumnStretch(10, 10)
         return widget
         
     def addLightsPage(self):
@@ -308,8 +372,75 @@ class exportKerkytheaDialog(QtGui.QDialog):
         return widget
         
     def addCmerasPage(self):
-        widget = QtGui.QWidget()
+        self.resolution = QtGui.QComboBox()
+        self.resolution.addItems(['200x200', '320x200', '320x240', '500x500', '512x384', '640x480', '768x576', '800x600', '1024x768', '1280x1024', '1600x1200', '2048x1536', '2816x2112'])
+        self.resolution.setCurrentIndex(self.resolution.findText('1024x768'))
+
+        self.cameraName = QtGui.QLineEdit(u'Camera 1')
+
+        filmBox = QtGui.QGroupBox(u'General')
+        filmBoxLay = QtGui.QGridLayout(filmBox)
+        filmBoxLay.addWidget(QtGui.QLabel(u'Camera name'), 0, 0, 1, 1)
+        filmBoxLay.addWidget(self.cameraName, 0, 1, 1, 1)
+        filmBoxLay.addWidget(QtGui.QLabel(u'Resolution'), 1, 0, 1, 1)
+        filmBoxLay.addWidget(self.resolution, 1, 1, 1, 1)
+
+        filmBoxLay.setHorizontalSpacing(50)
+        #
+        self.fNumber = QtGui.QComboBox()
+        self.fNumber.addItems(['1', '1.4', '2', '2.8', '4', '5.6', '8', '16', '22', 'Pinhole'])
+        self.fNumber.setCurrentIndex(self.fNumber.findText('Pinhole'))
+
+        self.focusDistance = QtGui.QDoubleSpinBox()
+        self.focusDistance.setValue(1.0)
+        self.focusDistance.setRange(0.0, 1000.0)
+
+        self.lensSamples = QtGui.QSpinBox()
+        self.lensSamples.setValue(3)
+        self.lensSamples.setRange(0, 1000)
+
+        lensBox = QtGui.QGroupBox(u'Lens')
+        lensBoxLay = QtGui.QGridLayout(lensBox)
+        lensBoxLay.addWidget(QtGui.QLabel(u'f-number'), 0, 0, 1, 1, QtCore.Qt.AlignHCenter)
+        lensBoxLay.addWidget(self.fNumber, 1, 0, 1, 1)
+        lensBoxLay.addWidget(QtGui.QLabel(u'Focus Distance'), 0, 1, 1, 1, QtCore.Qt.AlignHCenter)
+        lensBoxLay.addWidget(self.focusDistance, 1, 1, 1, 1)
+        lensBoxLay.addWidget(QtGui.QLabel(u'Lens Samples'), 0, 2, 1, 1, QtCore.Qt.AlignHCenter)
+        lensBoxLay.addWidget(self.lensSamples, 1, 2, 1, 1)
+
+        lensBoxLay.setHorizontalSpacing(50)
+        #
+        self.projection = QtGui.QComboBox()
+        self.projection.addItems(['Planar', 'Cylindrical', 'Spherical', 'Parallel'])
+        self.projection.setCurrentIndex(self.projection.findText('Planar'))
+
+        self.diaphragm = QtGui.QComboBox()
+        self.diaphragm.addItems(['Circular', 'Polygonal'])
+        self.diaphragm.setCurrentIndex(self.diaphragm.findText('Circular'))
         
+        self.blades = QtGui.QSpinBox()
+        self.blades.setValue(3)
+        self.blades.setRange(3, 1000)
+
+        geometryBox = QtGui.QGroupBox(u'Geometry')
+        geometryBoxLay = QtGui.QGridLayout(geometryBox)
+        geometryBoxLay.addWidget(QtGui.QLabel(u'Projection'), 0, 0, 1, 1, QtCore.Qt.AlignHCenter)
+        geometryBoxLay.addWidget(self.projection, 1, 0, 1, 1)
+        geometryBoxLay.addWidget(QtGui.QLabel(u'Diaphragm'), 0, 1, 1, 1, QtCore.Qt.AlignHCenter)
+        geometryBoxLay.addWidget(self.diaphragm, 1, 1, 1, 1)
+        geometryBoxLay.addWidget(QtGui.QLabel(u'Blades'), 0, 2, 1, 1, QtCore.Qt.AlignHCenter)
+        geometryBoxLay.addWidget(self.blades, 1, 2, 1, 1)
+
+        geometryBoxLay.setHorizontalSpacing(50)
+        #
+        #####
+        widget = QtGui.QWidget()
+        lay = QtGui.QVBoxLayout(widget)
+        lay.addWidget(filmBox)
+        lay.addWidget(lensBox)
+        lay.addWidget(geometryBox)
+        lay.addStretch(10)
+
         return widget
         
 
@@ -387,11 +518,24 @@ class exportKerkythea(exportKerkytheaDialog):
 #                    projectModels[i.Label].append(model)
                 #
                 model.addFace(i.Shape.Faces[j])
-            
+
         exporter = exportTokerkythea()
         exporter.modelsMultiColors = modelsMultiColors
         exporter.models = projectModels
-        exporter.write('C:\test.xml', FreeCAD.ActiveDocument.Label)
+        # CAMERA
+        camera = Camera()
+        camera.name = self.cameraName.text()
+        camera.f_number = self.fNumber.currentText()
+        camera.resolution = self.resolution.currentText()
+        camera.focusDistance = self.focusDistance.value()
+        camera.lensSamples = self.lensSamples.value()
+        camera.blades = self.blades.value()
+        camera.diaphragm = self.diaphragm.currentText()
+        camera.projection = self.projection.currentText()
+        
+        exporter.camera = camera
+        #
+        exporter.write(self.filePath.text(), FreeCAD.ActiveDocument.Label)
 
         self.close()
 
