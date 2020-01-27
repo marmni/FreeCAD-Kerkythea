@@ -9,7 +9,7 @@ FreeCAD >= v0.16
 
 
 ## Installation
-Install this workbench via the [FreeCAD Addon Manager](https://github.com/FreeCAD/FreeCAD-addons#1-builtin-addon-manager)
+Install this macro via the [FreeCAD Addon Manager](https://github.com/FreeCAD/FreeCAD-addons#1-builtin-addon-manager)
 
 
 ## Usage
